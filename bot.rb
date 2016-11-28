@@ -55,11 +55,11 @@ reddit_scraping_thread = Thread.new do
       $reddit.links(subreddit).each do |link|
         link_title = link.title
         if is_a_good_question?(link_title)
-          puts "Found question: #{link_title}"
+          debug "Found question: #{link_title}"
           $question_details[link_title][:id] = link.id
           $questions_found_on_reddit << link_title
         else
-          puts "Discarded question: #{link_title}"
+          debug "Discarded question: #{link_title}"
         end
       end
     end
@@ -84,18 +84,20 @@ quora_thread = Thread.new do
     question = $questions_found_on_reddit.pop
     debug "Trying to match '#{question} on Quora"
 
-    quora_response, top_question, top_answer = answered_on_quora? question
+    answered, question_phrasing, top_answer = answered_on_quora? question
+    #quora_response, top_question, top_answer = answered_on_quora? question
 
-    if quora_response == true
+    if answered == true
       # Question is answered on Quora, lets go post the answer back to reddit
       $question_details[question][:answer] = top_answer
-    elsif quora_response == false
+    elsif answered == false
       # Question either doesn't exist on Quora, or isn't answered -- do nothing
-    elsif quora_response == :maybe
+    elsif answered == :maybe
       # Not sure if the top Quora search result is a direct mapping -- ask on IRC
-      $question_details[question][:answer] = "#{top_question}: #{top_answer}"
+      $question_details[question][:answer] = "#{question_phrasing}: #{top_answer}"
 
-      $irc.channels.first.send "Are [#{top_question}] and [#{question}] asking the same thing?"
+      # Rely on FIFO to ensure answer ordering for now
+      $irc.channels.first.send "Are [#{question_phrasing}] and [#{question}] asking the same thing?"
       $irc_question_last_asked << question
     end
   end
