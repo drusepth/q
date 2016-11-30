@@ -12,6 +12,15 @@ class QuoraService
     ]
   end
 
+  def self.top_answer question_url
+    response = HTTParty.get(question_url, headers: self.headers)
+    doc = Nokogiri::HTML(response.body)
+
+    doc.at('.Answer').at('div').children()[1].children().at('.rendered_qtext').text()
+  rescue
+    nil
+  end
+
   private
 
   def self.headers
@@ -31,6 +40,6 @@ class QuoraService
 
   def self.search_path query
     #todo url sanitize
-    "https://www.quora.com/search?type=question&q=#{query}"
+    "https://www.quora.com/search?type=question&q=#{URI::encode query}"
   end
 end
