@@ -160,6 +160,7 @@ DEPENDENCIES
   httparty
   jbuilder (~> 2.0)
   jquery-rails
+  nokogiri
   rails (= 4.2.7.1)
   redditkit
   sass-rails (~> 5.0)

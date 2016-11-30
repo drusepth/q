@@ -1,5 +1,19 @@
 class QuoraService
 
+  def self.question_match question
+    response = HTTParty.get(search_path(question), headers: self.headers)
+
+    doc = Nokogiri::HTML(response.body)
+    match = doc.at('a[class="question_link"]')
+
+    [
+      match.text(),
+      'https://www.quora.com' + match['href']
+    ]
+  end
+
+  private
+
   def self.headers
     {
       'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -14,11 +28,6 @@ class QuoraService
       'Upgrade-Insecure-Requests' => '1'
     }
   end
-
-  def self.questions question
-    HTTParty.get(search_path(question), headers: self.headers)
-  end
-
 
   def self.search_path query
     #todo url sanitize
