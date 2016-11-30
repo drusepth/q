@@ -1,0 +1,40 @@
+=== Models
+
+Question
+ | id
+
+Phrasing
+ | id
+ | question_id
+ | phrasing:string
+
+Query (instances of people asking questions)
+ | id
+ | phrasing_id
+ | seen_at:string
+
+Answer
+ | id
+ | question_id
+ | answer:string
+
+Response (instances of posting answers to questions)
+ | id
+ | question_id
+ | answer_id
+ | seen_at:string
+
+=== Tasks
+
+- QuestionFinder
+  - Goes out to the Internet looking for questions, records them as Questions
+
+- AnswerFinder
+  - Grabs an unanswered question and goes out to the Internet to find answers
+  - Either kicks off QuestionPoster or AnswerPoster depending on what is found
+
+- QuestionPoster
+  - Grabs an unanswered question and posts it more places to get answers
+
+- AnswerPoster
+  - Posts the answer to a question as a response to the original source
