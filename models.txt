@@ -21,6 +21,7 @@ Answer
 Response (instances of posting answers to questions)
  | id
  | question_id
+ | query_id
  | answer_id
  | seen_at:string
 

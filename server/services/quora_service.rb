@@ -6,10 +6,14 @@ class QuoraService
     doc = Nokogiri::HTML(response.body)
     match = doc.at('a[class="question_link"]')
 
-    [
-      match.text(),
-      'https://www.quora.com' + match['href']
-    ]
+    if match
+      [
+        match.text(),
+        'https://www.quora.com' + match['href']
+      ]
+    else
+      [nil, nil]
+    end
   end
 
   def self.top_answer question_url

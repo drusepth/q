@@ -48,12 +48,14 @@ ActiveRecord::Schema.define(version: 20161130011905) do
   create_table "responses", force: :cascade do |t|
     t.integer  "question_id"
     t.integer  "answer_id"
+    t.integer  "query_id"
     t.string   "seen_at"
     t.datetime "created_at",  null: false
     t.datetime "updated_at",  null: false
   end
 
   add_index "responses", ["answer_id"], name: "index_responses_on_answer_id"
+  add_index "responses", ["query_id"], name: "index_responses_on_query_id"
   add_index "responses", ["question_id"], name: "index_responses_on_question_id"
 
 end
