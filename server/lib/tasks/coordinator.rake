@@ -23,7 +23,7 @@ namespace :coordinator do
 
     while true
       # Fetch new questions
-      output_channel.send "Looking for new questions..."
+      output_channel.send "Looking for new questions. Found the following new ones:"
 
       RedditService.question_source_subreddits.each do |subreddit|
         RedditService.client.links(subreddit).each do |link|
@@ -86,9 +86,39 @@ namespace :coordinator do
 
       # Post answers to queries
 
+      output_channel.send "Choosing a random answered question we haven't responded to yet..."
+
+      question = QuestionSelectionService.answered_question_without_response
+      if question.present?
+        output_channel.send "Selected question with #{question.phrasings.count} phrasings:"
+        question.phrasings.map(&:phrasing).each { |phrasing| output_channel.send "  * #{phrasing}" }
+
+        question.queries.each do |query|
+          # If this query has already been responded to, skip it
+          next if query.responses.any?
+
+          answer = question.answers.sample
+          output_channel.send "Responding to query seen at #{query.seen_at} with answer of length #{answer.answer.length}."
+
+          begin
+            comment = RedditService.reply_to query.seen_at, with: answer.answer
+
+            # Log response so we don't post this answer again
+            output_channel.send "Posted comment with ID #{comment.link_id}"
+            Response.where(question: question, answer: answer, query: query, seen_at: comment.link_id).first_or_create
+
+          rescue RedditKit::RateLimited
+            output_channel.send "Currently rate-limited by Reddit -- will try again later."
+          end
+        end
+
+      else
+        output_channel.send "No answered questions are waiting for a response."
+      end
+
       sleep 5
 
-      output_channel.send "Sleeping for 60 seconds."
+      output_channel.send "All done with this cycle. Sleeping for 60 seconds."
       sleep 60
     end
   end

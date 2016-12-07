@@ -42,9 +42,9 @@ class RedditService
     link = self.link_from_url url
 
     self.client.submit_comment(link, with)
-  rescue RedditKit::RateLimited
-    puts "Rate limited by reddit -- retrying in 60 seconds."
-    sleep 60
-    retry
+  # rescue RedditKit::RateLimited
+  #   puts "Rate limited by reddit -- retrying in 60 seconds."
+  #   sleep 60
+  #   retry
   end
 end
