@@ -32,9 +32,32 @@ namespace :answers do
     end
   end
 
-  desc "TODO"
+  desc "Picks a random answered question and posts a response with the answer"
   task post: :environment do
+    puts "Choosing a random answered question we haven't responded to yet..."
 
+    question = QuestionSelectionService.answered_question_without_response
+    if question.present?
+      puts "Selected question with #{question.phrasings.count} phrasings:"
+      puts question.phrasings.map(&:phrasing).to_sentence
+
+      question.queries.each do |query|
+        # If this query has already been responded to, skip it
+        next if query.responses.any?
+
+        answer = question.answers.sample
+        puts "Responding to query seen at #{query.seen_at} with answer of length #{answer.answer.length}."
+
+        comment = RedditService.reply_to query.seen_at, with: answer.answer
+
+        # Log response so we don't post this answer again
+        puts "Logging response at #{comment.link_id}"
+        Response.where(question: question, answer: answer, query: query, seen_at: comment.link_id).first_or_create
+      end
+
+    else
+      puts "No answered questions are waiting for a response."
+    end
   end
 
 end
