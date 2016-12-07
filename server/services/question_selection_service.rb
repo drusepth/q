@@ -17,7 +17,37 @@ class QuestionSelectionService
     end
   end
 
+  def self.unanswered_questions
+    Question
+      .includes(:phrasings)
+      .includes(:answers)
+      .where.not(phrasings: { id: nil })
+      .where(answers: { id: nil })
+  end
+
+  def self.answered_questions
+    Question
+      .includes(:phrasings)
+      .includes(:answers)
+      .where.not(phrasings: { id: nil })
+      .where.not(answers: { id: nil })
+  end
+
+  # Returns a random question we have no answers to
   def self.unanswered_question
-    Question.includes(:answers).where(answers: { id: nil }).sample
+    self.unanswered_questions.sample
+  end
+
+  # Returns a random question we've found an answer to, but haven't posted that answer back to the
+  # question's original query
+  def self.answered_question_without_response
+    answered_questions = self.answered_questions
+
+    # Filter out answered questions that we've already posted the answer to
+    answered_questions
+      .includes(:responses)
+      .where.not(responses: { id: nil })
+
+    answered_questions.sample
   end
 end
