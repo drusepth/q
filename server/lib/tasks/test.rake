@@ -34,7 +34,7 @@ namespace :test do
           end
 
           m.reply "#{m.user}: #{public_answer}."
-          m.user.notice "#{private_answer}" if private_answer.length > '..'.length
+          m.user.reply "#{private_answer}" if private_answer.length > '..'.length
         end
       end
     end

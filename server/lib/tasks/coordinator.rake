@@ -46,14 +46,15 @@ namespace :coordinator do
       end
 
       output_channel.send "Now monitoring #{QuestionSelectionService.unanswered_questions.count} unanswered questions."
-      output_channel.send "#{QuestionSelectionService.answered_questions.count} questions have been answered."
+      output_channel.send "We've found answers to #{QuestionSelectionService.answered_questions.count} questions."
+      output_channel.send "#{QuestionSelectionService.answered_questions_without_response.count} (answered) questions are waiting for us to respond to."
 
-      sleep 5
+      sleep 30
 
       # Look for new answers
       output_channel.send "Looking for new answers..."
 
-      unanswered_questions = QuestionSelectionService.unanswered_questions.first(5)
+      unanswered_questions = QuestionSelectionService.unanswered_questions.sample(10)
       unanswered_questions.each do |unanswered_question|
         phrasings = unanswered_question.phrasings
 
@@ -84,6 +85,8 @@ namespace :coordinator do
         end
       end
 
+      sleep 30
+
       # Post answers to queries
 
       output_channel.send "Choosing a random answered question we haven't responded to yet..."
@@ -101,14 +104,25 @@ namespace :coordinator do
           output_channel.send "Responding to query seen at #{query.seen_at} with answer of length #{answer.answer.length}."
 
           begin
-            comment = RedditService.reply_to query.seen_at, with: answer.answer
+            output_channel.send "Formatting answer for reddit..."
+
+            formatted_answer = SanitationService.fuzz_paragraphs answer.answer
+            comment = RedditService.reply_to query.seen_at, with: formatted_answer
 
             # Log response so we don't post this answer again
-            output_channel.send "Posted comment with ID #{comment.link_id}"
-            Response.where(question: question, answer: answer, query: query, seen_at: comment.link_id).first_or_create
+            if comment == :archived
+              puts "Question was archived. Marking it responded to so we can ignore it."
+              Response.where(question: question, answer: answer, query: query, seen_at: 'archived').first_or_create
+            elsif comment.present?
+              output_channel.send "Posted comment with ID #{comment.link_id}"
+              Response.where(question: question, answer: answer, query: query, seen_at: comment.link_id).first_or_create
+            else
+              output_channel.send "Unknown error while commenting to reddit. See the logs."
+            end
 
           rescue RedditKit::RateLimited
             output_channel.send "Currently rate-limited by Reddit -- will try again later."
+            sleep 20
           end
         end
 
@@ -116,10 +130,10 @@ namespace :coordinator do
         output_channel.send "No answered questions are waiting for a response."
       end
 
-      sleep 5
+      sleep 10
 
       output_channel.send "All done with this cycle. Sleeping for 60 seconds."
-      sleep 60
+      sleep 180
     end
   end
 end

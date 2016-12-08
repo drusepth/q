@@ -41,13 +41,21 @@ class QuestionSelectionService
   # Returns a random question we've found an answer to, but haven't posted that answer back to the
   # question's original query
   def self.answered_question_without_response
+    self.answered_questions_without_response.sample
+  end
+
+  def self.answered_questions_without_response
     answered_questions = self.answered_questions
 
     # Filter out answered questions that we've already posted the answer to
     answered_questions
       .includes(:responses)
-      .where.not(responses: { id: nil })
+      .where(responses: { id: nil })
 
-    answered_questions.sample
+    answered_questions
+      .to_a
+      .reject! { |question| question.responses.any? }
+
+    answered_questions
   end
 end

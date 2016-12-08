@@ -1,6 +1,8 @@
 class QuoraService
 
   def self.question_match question
+    sleep 10
+
     response = HTTParty.get(search_path(question), headers: self.headers)
 
     doc = Nokogiri::HTML(response.body)
@@ -17,6 +19,8 @@ class QuoraService
   end
 
   def self.top_answer question_url
+    sleep 10
+
     response = HTTParty.get(question_url, headers: self.headers)
     doc = Nokogiri::HTML(response.body)
 

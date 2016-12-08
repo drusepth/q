@@ -51,8 +51,15 @@ namespace :answers do
         comment = RedditService.reply_to query.seen_at, with: answer.answer
 
         # Log response so we don't post this answer again
-        puts "Logging response at #{comment.link_id}"
-        Response.where(question: question, answer: answer, query: query, seen_at: comment.link_id).first_or_create
+        if comment == :archived
+          puts "Question was archived. Marking it responded to so we can ignore it."
+          Response.where(question: question, answer: answer, query: query, seen_at: 'archived').first_or_create
+        elsif comment.present?
+          puts "Logging response at #{comment.link_id}"
+          Response.where(question: question, answer: answer, query: query, seen_at: comment.link_id).first_or_create
+        else
+          puts "Couldn't post to reddit for some reason."
+        end
       end
 
     else

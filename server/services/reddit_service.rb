@@ -34,14 +34,28 @@ class RedditService
 
   def self.link_from_url url
     #todo are all links prefixed with t3_ ?
+    puts "Extracting comment ID from #{url}"
     self.client.link 't3_' + self.comment_id_from_comment_url(url)
+  rescue
+    #todo logging
+    nil
   end
 
   # returns newly-posted comment object
   def self.reply_to url, with:
-    link = self.link_from_url url
+    return nil if url.nil? or with.nil?
+    return :archived if with.length > 5000
 
-    self.client.submit_comment(link, with)
+    link = self.link_from_url url
+    if link.present? and with.present?
+      puts "Responding to #{url} with #{with}"
+      self.client.submit_comment(link, with)
+      puts "Submitted."
+    end
+  rescue RedditKit::Archived
+    :archived
+  rescue RedditKit::PermissionDenied
+    :archived
   # rescue RedditKit::RateLimited
   #   puts "Rate limited by reddit -- retrying in 60 seconds."
   #   sleep 60
