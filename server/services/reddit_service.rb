@@ -4,7 +4,14 @@ class RedditService
   end
 
   def self.question_source_subreddits
-    %w(askscience nostupidquestions)
+    %w(
+      askscience nostupidquestions questions gaming askwomen relationship_advice
+      answers techsupport AskCulinary AskGames AskACountry AskLiteraryStudies AskNetsec AskStatistics
+      AskSciTech Antiques legaladvice AskPhotography AskComputerScience AskHistory hometheater askdrugs
+      AskScienceFiction AskElectronics asktransgender Teachers AskAcademia dating_advice learnmath
+      LearnJapanese French askphilosophy AskSocialScience AskEngineers InsightfulQuestions TrueAskReddit
+      PoliticalDiscussion booksuggestions
+    )
   end
 
   def self.current_questions_in subreddit
