@@ -2,7 +2,7 @@ class QuestionSelectionService
   def self.is_a_question? question
     [
       #text.strip[-1] == '?',
-      %(who what what's when where why how).include?(question.strip.split(' ')[0].downcase)
+      %w(who what what's when where why how).include?(question.strip.split(' ')[0].downcase)
     ].all?
   end
 

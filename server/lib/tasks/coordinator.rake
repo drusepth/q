@@ -24,25 +24,8 @@ namespace :coordinator do
     while true
       # Fetch new questions
       output_channel.send "Looking for new questions. Found the following new ones:"
-
-      RedditService.question_source_subreddits.each do |subreddit|
-        RedditService.client.links(subreddit).each do |link|
-          link_title = link.title
-
-          if QuestionSelectionService.is_a_question? link_title
-            next if QuestionSelectionService.existing_question_match(link_title).present?
-
-            output_channel.send "  * #{link_title}"
-
-            question = QuestionSelectionService.existing_question_match link_title
-            question ||= Question.create
-
-            phrasing = Phrasing.where(question: question, phrasing: link_title).first_or_create
-            query = Query.where(phrasing: phrasing, seen_at: link.url).first_or_create
-
-          end
-
-        end
+      RedditService.find_and_save_questions.each do |phrasing|
+        output_channel.send "  * #{phrasing}"
       end
 
       output_channel.send "Now monitoring #{QuestionSelectionService.unanswered_questions.count} unanswered questions."
@@ -75,7 +58,7 @@ namespace :coordinator do
             top_answer = QuoraService.top_answer question_url
             if top_answer.present?
               output_channel.send "Got answer of length #{top_answer.length}."
-              answer = unanswered_question.answers.where(answer: top_answer).first_or_create
+              answer = unanswered_question.answers.where(answer: top_answer, source: question_url).first_or_create
             else
               output_channel.send "Question not answered yet; will try again later."
             end
@@ -107,7 +90,7 @@ namespace :coordinator do
             output_channel.send "Formatting answer for reddit..."
 
             formatted_answer = SanitationService.fuzz_paragraphs answer.answer
-            comment = RedditService.reply_to query.seen_at, with: formatted_answer
+            comment = RedditService.reply_to(query.seen_at, with: formatted_answer, source: answer.source)
 
             # Log response so we don't post this answer again
             if comment == :archived
