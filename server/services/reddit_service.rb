@@ -5,54 +5,47 @@ class RedditService
 
   def self.question_source_subreddits
     %w(
-      askscience askreddit nostupidquestions AskPhotography
+      automation singularity futurology
+      medievalworldproblems physicsjokes circlejerk ShittyAnimalFacts gamedev SelfDrivingCars
+      askscience askreddit nostupidquestions AskPhotography chrome chromecast
+      questions gaming google apple android homeautomation startups overpopulation
+      answers AskCulinary AskGames AskACountry AskLiteraryStudies AskNetsec AskStatistics
+      AskSciTech Antiques legaladvice  AskComputerScience AskHistory hometheater askdrugs
+      AskScienceFiction AskElectronics asktransgender Teachers AskAcademia learnmath
+      LearnJapanese French askphilosophy AskSocialScience AskEngineers trees marijuana
+      PoliticalDiscussion booksuggestions explainlikeimfive GamePhysics BasicIncome
+      correctmeifwrong outoftheloop politics worldnews sports videos television showerthoughts
+      crazyideas food cooking science jokes gadgets music mildlyinteresting news TwoXChromosomes
+      TrollXChromosomes The_Donald GetMotivated books DIY philosophy lifeprotips
+      funny history nutrition
     )
-    # questions gaming askwomen relationship_advice
-    # answers techsupport AskCulinary AskGames AskACountry AskLiteraryStudies AskNetsec AskStatistics
-    # AskSciTech Antiques legaladvice  AskComputerScience AskHistory hometheater askdrugs
-    # AskScienceFiction AskElectronics asktransgender Teachers AskAcademia dating_advice learnmath
-    # LearnJapanese French askphilosophy AskSocialScience AskEngineers InsightfulQuestions TrueAskReddit
-    # PoliticalDiscussion booksuggestions
   end
-
-  # def self.current_questions_in subreddit
-  #   questions = []
-
-  #   RedditService.client.links(subreddit).each do |link|
-  #     link_title = link.title
-
-  #     if QuestionSelectionService.is_a_question? link_title
-  #       puts "Found question: #{link_title}"
-  #       questions << link_title
-  #     else
-  #       puts "Discarded question: #{link_title}"
-  #     end
-  #   end
-
-  #   questions
-  # end
 
   def self.find_and_save_questions
     found_phrasings = []
 
     RedditService.question_source_subreddits.each do |subreddit|
-      RedditService.client.links(subreddit).each do |link|
-        link_title = link.title
+      begin
+        RedditService.client.links(subreddit).each do |link|
+          link_title = link.title
 
-        if QuestionSelectionService.is_a_question? link_title
-          next if QuestionSelectionService.existing_question_match(link_title).present?
-          puts "Found question: #{link_title}"
+          if QuestionSelectionService.is_a_question? link_title
+            next if QuestionSelectionService.existing_question_match(link_title).present?
+            puts "Found question: #{link_title}"
 
-          question = QuestionSelectionService.existing_question_match link_title
-          question ||= Question.create
+            question = QuestionSelectionService.existing_question_match link_title
+            question ||= Question.create
 
-          phrasing = Phrasing.where(question: question, phrasing: link_title).first_or_create
-          query = Query.where(phrasing: phrasing, seen_at: link.permalink).first_or_create
+            phrasing = Phrasing.where(question: question, phrasing: link_title).first_or_create
+            query = Query.where(phrasing: phrasing, seen_at: link.permalink).first_or_create
 
-          found_phrasings << link_title
-        else
-          puts "Discarded question: #{link_title}"
+            found_phrasings << link_title
+          else
+            puts "Discarded question: #{link_title}"
+          end
         end
+      rescue RedditKit::PermissionDenied
+        next
       end
     end
 
@@ -91,9 +84,14 @@ class RedditService
       self.client.submit_comment(link, response)
     end
   rescue RedditKit::Archived
+    puts "Thread was archived"
     :archived
   rescue RedditKit::PermissionDenied
+    puts "Permission Denied -- we're probably banned from this subreddit?"
     :archived
+  rescue RedditKit::RateLimited
+    puts "We're rate limited by reddit."
+    nil
   # rescue RedditKit::RateLimited
   #   puts "Rate limited by reddit -- retrying in 60 seconds."
   #   sleep 60
@@ -102,12 +100,12 @@ class RedditService
 
   def self.response_template
     [
-      "Hi! I found [a similar question](<source>) asked elsewhere, ",
+      "Hi! I found [a similar question](<source>?share=1) asked elsewhere, ",
       "so the answer there might help you:",
       "\n\n",
       "><answer>",
       "\n\n",
-      "^(I'm just a bot trying to share the love. Sorry if questions are loose matches right now; i'm working on it!)"
+      "^(I'm just a bot trying to share the love. Sorry if questions are loose matches right now; I'm working on it!)"
     ].join
   end
 end

@@ -30,7 +30,7 @@ namespace :coordinator do
 
       output_channel.send "Now monitoring #{QuestionSelectionService.unanswered_questions.count} unanswered questions."
       output_channel.send "We've found answers to #{QuestionSelectionService.answered_questions.count} questions."
-      output_channel.send "#{QuestionSelectionService.answered_questions_without_response.count} (answered) questions are waiting for us to respond to."
+      output_channel.send "#{QuestionSelectionService.answered_questions.select { |question| question.responses.empty? }.count} (answered) questions are waiting for us to respond to."
 
       sleep 30
 
@@ -87,7 +87,11 @@ namespace :coordinator do
           output_channel.send "Responding to query seen at #{query.seen_at} with answer of length #{answer.answer.length}."
 
           begin
-            output_channel.send "Formatting answer for reddit..."
+            if answer.answer.length < 10000
+              output_channel.send "Formatting answer for reddit..."
+            else
+              output_channel.send "Answer is too long for reddit. Deleting saved answer."
+            end
 
             formatted_answer = SanitationService.fuzz_paragraphs answer.answer
             comment = RedditService.reply_to(query.seen_at, with: formatted_answer, source: answer.source)
