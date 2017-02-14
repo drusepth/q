@@ -11,7 +11,7 @@ $questions_to_post_answers_to = Queue.new
 # A fifo queue for matching LUI answers in order on IRC
 $irc_question_last_asked = Queue.new
 
-# Global hash keyed off questionss that includes the reddit comment ID they were seen at, and the answer we fetched from Quora
+# Global hash keyed off questions that includes the reddit comment ID they were seen at, and the answer we fetched from Quora
 $question_details = Hash.new({id: nil, answer: nil})
 
 # reddit interface
