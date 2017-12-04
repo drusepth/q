@@ -16,7 +16,7 @@ namespace :test do
         puts "Matched question: #{question_match}"
         puts "at #{question_url}"
 
-        top_answer = QuoraService.top_answer question_url
+        top_answer, answerer = QuoraService.top_answer question_url
 
         if top_answer.nil?
           m.reply "#{m.user}: I have no idea"

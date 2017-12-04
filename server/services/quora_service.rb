@@ -24,9 +24,12 @@ class QuoraService
     response = HTTParty.get(question_url, headers: self.headers)
     doc = Nokogiri::HTML(response.body)
 
-    doc.at('.Answer').at('div').children()[1].children().at('.rendered_qtext').text()
+    answerer = doc.at('.Answer').at('.AnswerHeader').at('a.user').text()
+    answer = doc.at('.Answer').at('div').children()[2].children().at('.rendered_qtext').text()
+
+    [answer, answerer]
   rescue
-    nil
+    [nil, nil]
   end
 
   private

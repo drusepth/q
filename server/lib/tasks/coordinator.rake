@@ -55,10 +55,14 @@ namespace :coordinator do
             end
 
             output_channel.send "Extracting top answer..."
-            top_answer = QuoraService.top_answer question_url
+            top_answer, answerer = QuoraService.top_answer question_url
             if top_answer.present?
               output_channel.send "Got answer of length #{top_answer.length}."
-              answer = unanswered_question.answers.where(answer: top_answer, source: question_url).first_or_create
+              answer = unanswered_question.answers.where(
+                answer: top_answer,
+                source: question_url,
+                answerer: answerer
+              ).first_or_create
             else
               output_channel.send "Question not answered yet; will try again later."
             end
@@ -94,7 +98,7 @@ namespace :coordinator do
             end
 
             formatted_answer = SanitationService.fuzz_paragraphs answer.answer
-            comment = RedditService.reply_to(query.seen_at, with: formatted_answer, source: answer.source)
+            comment = RedditService.reply_to(query.seen_at, with: formatted_answer, answer: answer)
 
             # Log response so we don't post this answer again
             if comment == :archived

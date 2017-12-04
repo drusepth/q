@@ -17,7 +17,9 @@ class RedditService
       correctmeifwrong outoftheloop politics worldnews sports videos television showerthoughts
       crazyideas food cooking science jokes gadgets music mildlyinteresting news TwoXChromosomes
       TrollXChromosomes The_Donald GetMotivated books DIY philosophy lifeprotips
-      funny history nutrition
+      funny history nutrition morbidquestions
+
+      dinghysailing sailing boats cars
     )
   end
 
@@ -26,6 +28,7 @@ class RedditService
 
     RedditService.question_source_subreddits.each do |subreddit|
       begin
+        puts "Searching #{subreddit}:"
         RedditService.client.links(subreddit).each do |link|
           link_title = link.title
 
@@ -41,7 +44,7 @@ class RedditService
 
             found_phrasings << link_title
           else
-            puts "Discarded question: #{link_title}"
+            #puts "Discarded question: #{link_title}"
           end
         end
       rescue RedditKit::PermissionDenied
@@ -70,14 +73,15 @@ class RedditService
   end
 
   # returns newly-posted comment object
-  def self.reply_to url, with:, source:
+  def self.reply_to url, with:, answer:
     return nil if url.nil? or with.nil?
     return :archived if with.length > 10000
 
     link = self.link_from_url url
     if link.present? and with.present?
       response = self.response_template
-      response.gsub!('<source>', source)
+      response.gsub!('<source>', answer.source)
+      response.gsub!('<answerer>', answer.answerer)
       response.gsub!('<answer>', SanitationService.fuzz_paragraphs(with).gsub("\n\n", "\n\n>"))
 
       puts "Responding to #{url} with #{response}."
@@ -101,7 +105,7 @@ class RedditService
   def self.response_template
     [
       "Hi! I found [a similar question](<source>?share=1) asked elsewhere, ",
-      "so the answer there might help you:",
+      "so the answer there (from <answerer>) might help you:",
       "\n\n",
       "><answer>",
       "\n\n",

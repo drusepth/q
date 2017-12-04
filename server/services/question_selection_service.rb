@@ -1,7 +1,7 @@
 class QuestionSelectionService
   def self.is_a_question? question
     [
-      #text.strip[-1] == '?',
+      question.strip[-1] == '?',
       %w(who what what's when where why how will is should does are).include?(question.strip.split(' ')[0].downcase)
     ].all?
   end

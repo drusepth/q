@@ -19,10 +19,14 @@ namespace :answers do
         end
 
         puts "Extracting top answer..."
-        top_answer = QuoraService.top_answer question_url
+        top_answer, answerer = QuoraService.top_answer question_url
         if top_answer.present?
           puts "Got answer of length #{top_answer.length}."
-          answer = unanswered_question.answers.where(answer: top_answer, source: question_url).first_or_create
+          answer = unanswered_question.answers.where(
+            answer: top_answer,
+            source: question_url,
+            answerer: answerer
+          ).first_or_create
         else
           puts "Question not answered yet; will try again later."
         end
@@ -52,10 +56,14 @@ namespace :answers do
           end
 
           puts "Extracting top answer..."
-          top_answer = QuoraService.top_answer question_url
+          top_answer, answerer = QuoraService.top_answer question_url
           if top_answer.present?
             puts "Got answer of length #{top_answer.length}."
-            answer = unanswered_question.answers.where(answer: top_answer, source: question_url).first_or_create
+            answer = unanswered_question.answers.where(
+              answer: top_answer,
+              source: question_url,
+              answerer: answerer
+            ).first_or_create
           else
             puts "Question not answered yet; will try again later."
           end
@@ -82,7 +90,7 @@ namespace :answers do
         answer = question.answers.sample
         puts "Responding to query seen at #{query.seen_at} with answer of length #{answer.answer.length}."
 
-        comment = RedditService.reply_to(query.seen_at, with: answer.answer, source: answer.source)
+        comment = RedditService.reply_to(query.seen_at, with: answer.answer, answer: answer)
 
         # Log response so we don't post this answer again
         if comment == :archived
