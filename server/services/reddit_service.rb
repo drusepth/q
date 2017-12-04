@@ -105,11 +105,12 @@ class RedditService
   def self.response_template
     [
       "Hi! I found [a similar question](<source>?share=1) asked elsewhere, ",
-      "so the answer there (from <answerer>) might help you:",
+      "so the top answer there (from <answerer>) might be of interest:",
       "\n\n",
       "><answer>",
       "\n\n",
-      "^(I'm just a bot trying to share the love. Sorry if questions are loose matches right now; I'm working on it!)"
+      "^(I'm just a bot trying to share the love and help people get questions answered faster, and from more people. ",
+      "I hope it helps, human!)"
     ].join
   end
 end

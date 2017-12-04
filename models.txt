@@ -17,6 +17,7 @@ Answer
  | id
  | question_id
  | answer:string
+ | answerer:string
 
 Response (instances of posting answers to questions)
  | id
