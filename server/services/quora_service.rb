@@ -25,7 +25,7 @@ class QuoraService
     doc = Nokogiri::HTML(response.body)
 
     answerer = doc.at('.Answer').at('.AnswerHeader').at('a.user').text()
-    answer = doc.at('.Answer').at('div').children()[2].children().at('.rendered_qtext').text()
+    answer = doc.at('.Answer').at('div').children()[2].children().children().children()[1].children.map(&:text).join("\n\n")
 
     [answer, answerer]
   rescue

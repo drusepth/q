@@ -9,17 +9,19 @@ class RedditService
       medievalworldproblems physicsjokes circlejerk ShittyAnimalFacts gamedev SelfDrivingCars
       askscience askreddit nostupidquestions AskPhotography chrome chromecast
       questions gaming google apple android homeautomation startups overpopulation
-      answers AskCulinary AskGames AskACountry AskLiteraryStudies AskNetsec AskStatistics
+      AskCulinary AskGames AskACountry AskLiteraryStudies AskNetsec AskStatistics
       AskSciTech Antiques legaladvice  AskComputerScience AskHistory hometheater askdrugs
       AskScienceFiction AskElectronics asktransgender Teachers AskAcademia learnmath
       LearnJapanese French askphilosophy AskSocialScience AskEngineers trees marijuana
-      PoliticalDiscussion booksuggestions explainlikeimfive GamePhysics BasicIncome
+       booksuggestions explainlikeimfive GamePhysics BasicIncome
       correctmeifwrong outoftheloop politics worldnews sports videos television showerthoughts
       crazyideas food cooking science jokes gadgets music mildlyinteresting news TwoXChromosomes
       TrollXChromosomes The_Donald GetMotivated books DIY philosophy lifeprotips
-      funny history nutrition morbidquestions
+      funny history morbidquestions
 
       dinghysailing sailing boats cars
+    ) + %w(
+      PoliticalDiscussion answers nutrition
     )
   end
 
@@ -73,16 +75,16 @@ class RedditService
   end
 
   # returns newly-posted comment object
-  def self.reply_to url, with:, answer:
-    return nil if url.nil? or with.nil?
-    return :archived if with.length > 10000
+  def self.reply_to url, answer:
+    return nil if url.nil? || answer.nil?
+    return :archived if answer.answer.length > 10000
 
     link = self.link_from_url url
-    if link.present? and with.present?
+    if link.present? && answer.answer.present?
       response = self.response_template
       response.gsub!('<source>', answer.source)
       response.gsub!('<answerer>', answer.answerer)
-      response.gsub!('<answer>', SanitationService.fuzz_paragraphs(with).gsub("\n\n", "\n\n>"))
+      response.gsub!('<answer>', answer.answer.gsub("\n\n", "\n\n>"))
 
       puts "Responding to #{url} with #{response}."
       self.client.submit_comment(link, response)

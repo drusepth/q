@@ -97,8 +97,7 @@ namespace :coordinator do
               output_channel.send "Answer is too long for reddit. Deleting saved answer."
             end
 
-            formatted_answer = SanitationService.fuzz_paragraphs answer.answer
-            comment = RedditService.reply_to(query.seen_at, with: formatted_answer, answer: answer)
+            comment = RedditService.reply_to(query.seen_at, answer: answer)
 
             # Log response so we don't post this answer again
             if comment == :archived

@@ -1,5 +1,7 @@
 class SanitationService
   def self.fuzz_paragraphs text
+    raise "deprecated"
+
     paragraphs = []
     paragraph = []
     text.split('. ').each do |sentence|
