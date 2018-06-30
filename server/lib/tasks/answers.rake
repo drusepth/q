@@ -90,7 +90,7 @@ namespace :answers do
         answer = question.answers.sample
         puts "Responding to query seen at #{query.seen_at} with answer of length #{answer.answer.length}."
 
-        comment = RedditService.reply_to(query.seen_at, with: answer.answer, answer: answer)
+        comment = RedditService.reply_to(query.seen_at, answer: answer)
 
         # Log response so we don't post this answer again
         if comment == :archived

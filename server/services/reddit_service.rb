@@ -10,18 +10,20 @@ class RedditService
       askscience askreddit nostupidquestions AskPhotography chrome chromecast
       questions gaming google apple android homeautomation startups overpopulation
       AskCulinary AskGames AskACountry AskLiteraryStudies AskNetsec AskStatistics
-      AskSciTech Antiques legaladvice  AskComputerScience AskHistory hometheater askdrugs
+      AskSciTech Antiques legaladvice AskComputerScience AskHistory hometheater askdrugs
       AskScienceFiction AskElectronics asktransgender Teachers AskAcademia learnmath
       LearnJapanese French askphilosophy AskSocialScience AskEngineers trees marijuana
-       booksuggestions explainlikeimfive GamePhysics BasicIncome
+      booksuggestions explainlikeimfive GamePhysics BasicIncome tesla
       correctmeifwrong outoftheloop politics worldnews sports videos television showerthoughts
       crazyideas food cooking science jokes gadgets music mildlyinteresting news TwoXChromosomes
       TrollXChromosomes The_Donald GetMotivated books DIY philosophy lifeprotips
-      funny history morbidquestions
+      funny history morbidquestions personalfinance art europe america space spacex
+      techsupport bitcoin bitcoinall cryptocurrency tooafraidtoask
+      starwars starwarsspeculation mentalhealth college canada loseit
 
       dinghysailing sailing boats cars
     ) + %w(
-      PoliticalDiscussion answers nutrition
+      PoliticalDiscussion answers nutrition homeautomation OutOfTheLoop
     )
   end
 
